@@ -5,7 +5,7 @@ const HASH='7a9ce3a76ef3a27dff4109c42b1adb5bde98cbc888f2816277c06cae54ce9b33'; /
 const PDFJS='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/';
 const uid=()=>Math.random().toString(36).slice(2,8);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const sub=(n,id)=>({id:id||uid(),name:n,grade:'',file:'',size:0,sched:true,open:null,close:null});
+const sub=(n,id,cls)=>({id:id||uid(),name:n,cls,file:'',size:0,sched:true,open:null,close:null});
 const FONTS={sys:'system-ui,-apple-system,"Segoe UI",Roboto,sans-serif',round:'ui-rounded,"Nunito","Quicksand",system-ui,sans-serif',serif:'Georgia,"Times New Roman",serif'};
 const PRE=[
  {n:'Biru Sekolah',t:{p:'#1c3aa9',a:'#f5c400',bg:'#f4f6fb',card:'#ffffff',tx:'#141a33',smp:'#1c3aa9',sd:'#7a3535'}},
@@ -13,26 +13,29 @@ const PRE=[
  {n:'Hijau Segar',t:{p:'#0f7b5f',a:'#f2b705',bg:'#f1f8f5',card:'#ffffff',tx:'#10261f',smp:'#0f7b5f',sd:'#8a5a14'}},
  {n:'Ungu Modern',t:{p:'#5b3fd1',a:'#ff7a59',bg:'#f6f4fd',card:'#ffffff',tx:'#1d1638',smp:'#5b3fd1',sd:'#c2410c'}},
  {n:'Netral',t:{p:'#1f2937',a:'#22d3ee',bg:'#f3f4f6',card:'#ffffff',tx:'#111827',smp:'#1f2937',sd:'#475569'}}];
+const CL={smp:[['7','Kelas VII'],['8','Kelas VIII'],['9','Kelas IX']],sd:[['1','Kelas I'],['2','Kelas II'],['3','Kelas III'],['4','Kelas IV'],['5','Kelas V'],['6','Kelas VI']]};
+const NM={smp:['Pendidikan Agama','PPKn','Bahasa Indonesia','Matematika','IPA','IPS','Bahasa Inggris','PJOK','Informatika','Seni Budaya','Prakarya'],sd:['Pendidikan Agama','PPKn','Bahasa Indonesia','Matematika','IPAS','PJOK','Seni Rupa','Bahasa Inggris']};
+const area=(k,name,logo)=>({name,logo,info:'',classes:CL[k].map(([i,n])=>({id:k+i,name:n})),subjects:CL[k].flatMap(([i])=>NM[k].map((n,j)=>sub(n,k+i+'_'+j,k+i)))});
 const DEF={
  site:{title:'PENILAIAN AKHIR SEMESTER GANJIL',sub:'TAHUN PELAJARAN 2026/2027',notice:'',how:true,footer:'© 2026 SMPN Satu Atap 1 Tasik Payawan & SDN Talingke'},
  theme:{...PRE[0].t,r:16,font:'sys'},text:{id:{},en:{}},
- areas:{
-  smp:{name:'SMPN SATU ATAP 1 TASIK PAYAWAN',logo:'assets/logo-smp.png',info:'',subjects:['Pendidikan Agama','PPKn','Bahasa Indonesia','Matematika','IPA','IPS','Bahasa Inggris','PJOK','Informatika','Seni Budaya','Prakarya'].map((n,i)=>sub(n,'smp'+i))},
-  sd:{name:'SDN TALINGKE',logo:'assets/logo-sd.png',info:'',subjects:['Pendidikan Agama','PPKn','Bahasa Indonesia','Matematika','IPAS','PJOK','Seni Rupa','Bahasa Inggris'].map((n,i)=>sub(n,'sd'+i))}}};
+ areas:{smp:area('smp','SMPN SATU ATAP 1 TASIK PAYAWAN','assets/logo-smp.png'),sd:area('sd','SDN TALINGKE','assets/logo-sd.png')}};
 const I18={
- id:{tag:'Portal Soal PAS',home:'Beranda',smp:'Area SMP',sd:'Area SD',pick:'Pilih area sekolahmu',enter:'Masuk',mapel:'mata pelajaran',open:'Buka Soal',admOpen:'Buka (admin)',avail:'Tersedia',soon:'Belum dibuka',closed:'Ditutup',empty:'Belum tersedia',opens:'Dibuka',until:'Ditutup',in:'Dibuka dalam',all:'Semua',back:'Kembali',load:'Memuat soal…',err:'Soal gagal dimuat. Periksa sinyal, lalu coba lagi atau',tab:'buka di tab baru',closeq:'Tutup soal yang sedang dibuka?',howT:'Cara menggunakan',h1:'Pilih area sekolahmu.',h2:'Buka soal PDF saat jadwalnya tiba.',h3:'Jawab di lembar jawaban fisik.',fit:'Pas',none:'Belum ada mata pelajaran.',hint:'Cubit layar atau pakai tombol + / − untuk memperbesar soal.'},
- en:{tag:'PAS Exam Portal',home:'Home',smp:'Junior High',sd:'Elementary',pick:'Choose your school area',enter:'Enter',mapel:'subjects',open:'Open Exam',admOpen:'Open (admin)',avail:'Available',soon:'Not open yet',closed:'Closed',empty:'Not available yet',opens:'Opens',until:'Closes',in:'Opens in',all:'All',back:'Back',load:'Loading exam…',err:'The exam failed to load. Check your signal, then try again or',tab:'open in a new tab',closeq:'Close the exam you are viewing?',howT:'How to use',h1:'Choose your school area.',h2:'Open the PDF exam when its schedule starts.',h3:'Write your answers on the paper answer sheet.',fit:'Fit',none:'No subjects yet.',hint:'Pinch the screen or use the + / − buttons to zoom.'}};
+ id:{tag:'Portal Soal PAS',kelas:'kelas',pickc:'Pilih kelasmu',nocls:'Belum ada kelas.',home:'Beranda',smp:'Area SMP',sd:'Area SD',pick:'Pilih area sekolahmu',enter:'Masuk',mapel:'mata pelajaran',open:'Buka Soal',admOpen:'Buka (admin)',avail:'Tersedia',soon:'Belum dibuka',closed:'Ditutup',empty:'Belum tersedia',opens:'Dibuka',until:'Ditutup',in:'Dibuka dalam',all:'Semua',back:'Kembali',load:'Memuat soal…',err:'Soal gagal dimuat. Periksa sinyal, lalu coba lagi atau',tab:'buka di tab baru',closeq:'Tutup soal yang sedang dibuka?',howT:'Cara menggunakan',h1:'Pilih area sekolahmu.',h2:'Buka soal PDF saat jadwalnya tiba.',h3:'Jawab di lembar jawaban fisik.',fit:'Pas',none:'Belum ada mata pelajaran.',hint:'Cubit layar atau pakai tombol + / − untuk memperbesar soal.'},
+ en:{tag:'PAS Exam Portal',kelas:'classes',pickc:'Choose your class',nocls:'No classes yet.',home:'Home',smp:'Junior High',sd:'Elementary',pick:'Choose your school area',enter:'Enter',mapel:'subjects',open:'Open Exam',admOpen:'Open (admin)',avail:'Available',soon:'Not open yet',closed:'Closed',empty:'Not available yet',opens:'Opens',until:'Closes',in:'Opens in',all:'All',back:'Back',load:'Loading exam…',err:'The exam failed to load. Check your signal, then try again or',tab:'open in a new tab',closeq:'Close the exam you are viewing?',howT:'How to use',h1:'Choose your school area.',h2:'Open the PDF exam when its schedule starts.',h3:'Write your answers on the paper answer sheet.',fit:'Fit',none:'No subjects yet.',hint:'Pinch the screen or use the + / − buttons to zoom.'}};
 
-const TK=[['tag','Nama portal (kiri atas)'],['home','Menu: Beranda'],['smp','Menu: Area SMP'],['sd','Menu: Area SD'],['pick','Judul pilihan area'],['enter','Tombol masuk area'],['mapel','Kata "mata pelajaran"'],['howT','Judul "Cara menggunakan"'],['h1','Langkah 1'],['h2','Langkah 2'],['h3','Langkah 3'],['hint','Petunjuk di atas daftar soal'],['open','Tombol buka soal'],['avail','Label: Tersedia'],['soon','Label: Belum dibuka'],['closed','Label: Ditutup'],['empty','Label: Belum tersedia'],['opens','Kata sebelum tanggal buka'],['in','Kata sebelum hitung mundur'],['until','Kata sebelum tanggal tutup'],['all','Filter: Semua'],['back','Tombol kembali'],['fit','Tombol zoom Pas']];
+const TK=[['tag','Nama portal (kiri atas)'],['home','Menu: Beranda'],['smp','Menu: Area SMP'],['sd','Menu: Area SD'],['pick','Judul pilihan area'],['pickc','Judul pilihan kelas'],['enter','Tombol masuk area'],['mapel','Kata "mata pelajaran"'],['howT','Judul "Cara menggunakan"'],['h1','Langkah 1'],['h2','Langkah 2'],['h3','Langkah 3'],['hint','Petunjuk di atas daftar soal'],['open','Tombol buka soal'],['avail','Label: Tersedia'],['soon','Label: Belum dibuka'],['closed','Label: Ditutup'],['empty','Label: Belum tersedia'],['opens','Kata sebelum tanggal buka'],['in','Kata sebelum hitung mundur'],['until','Kata sebelum tanggal tutup'],['all','Filter: Semua'],['back','Tombol kembali'],['fit','Tombol zoom Pas']];
 const EYE='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>',
  EYEX='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3l18 18M10.6 5.1A10.7 10.7 0 0 1 12 5c6.4 0 10 7 10 7a17 17 0 0 1-3.2 4.2M6.6 6.6A17 17 0 0 0 2 12s3.6 7 10 7a10 10 0 0 0 4.2-.9M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>';
 const pwf=(id,ph,ac)=>`<div class="pw"><input type="password" id="${id}" placeholder="${ph}" autocomplete="${ac}" required><button type="button" class="eye" data-eye="${id}" aria-label="Tampilkan / sembunyikan password">${EYEX}</button></div>`;
-let cfg=structuredClone(DEF),lang=localStorage.pas_lang||'id',off=0,view='home',grade='',ak='smp',tab='sub',tl='id',
+let cfg=structuredClone(DEF),lang=localStorage.pas_lang||'id',off=0,view='home',cls='',grade='',ak='smp',tab='sub',tl='id',ac='',
  isAdmin=sessionStorage.pas_adm==='1',dirty=false,trash=[];
 const t=k=>(cfg.text[lang]&&cfg.text[lang][k])||I18[lang][k]||k;
 const pwh=()=>cfg.pw||HASH;
 const now=()=>Date.now()+off;
-function merge(j){const a=j.areas||{},x=j.text||{};cfg={...DEF,...j,text:{id:{...x.id},en:{...x.en}},site:{...DEF.site,...j.site},theme:{...DEF.theme,...j.theme},areas:{smp:{...DEF.areas.smp,...a.smp},sd:{...DEF.areas.sd,...a.sd}}}}
+function merge(j){const a=j.areas||{},x=j.text||{};cfg={...DEF,...j,text:{id:{...x.id},en:{...x.en}},site:{...DEF.site,...j.site},theme:{...DEF.theme,...j.theme},areas:{smp:{...DEF.areas.smp,...a.smp},sd:{...DEF.areas.sd,...a.sd}}};fix()}
+function fix(){const nm=x=>{x=String(x||'').toLowerCase().replace(/kelas\s*/,'').trim();return['','i','ii','iii','iv','v','vi','vii','viii','ix'][+x]||x};
+ for(const k of['smp','sd']){const a=cfg.areas[k],ids=a.classes.map(c=>c.id);a.subjects.forEach(s=>{if(!ids.includes(s.cls)){const m=a.classes.find(c=>nm(c.name)===nm(s.grade));s.cls=(m||a.classes[0]||{}).id}})}}
 
 /* ---------- Tema ---------- */
 const ink=h=>{const n=parseInt(h.slice(1),16);return .299*(n>>16)+.587*(n>>8&255)+.114*(n&255)>150?'#111':'#fff'};
@@ -74,20 +77,19 @@ function render(){
  if(view==='home'){
   app.innerHTML=`<section class="hero"><h1>${esc(S.title)}</h1><p>${esc(S.sub)}</p></section>
   <h2 class="sec">${t('pick')}</h2>
-  <div class="areas">${['smp','sd'].map(k=>`<a class="ac" href="#${k}" style="--c:var(--${k});--ci:var(--${k}i)"><img src="${esc(A[k].logo)}" alt=""><div><h3 style="font-size:17px">${esc(A[k].name)}</h3><small>${A[k].subjects.length} ${t('mapel')}</small><span class="btn">${t('enter')} →</span></div></a>`).join('')}</div>
+  <div class="areas">${['smp','sd'].map(k=>`<a class="ac" href="#${k}" style="--c:var(--${k});--ci:var(--${k}i)"><img src="${esc(A[k].logo)}" alt=""><div><h3 style="font-size:17px">${esc(A[k].name)}</h3><small>${A[k].classes.length} ${t('kelas')}</small><span class="btn">${t('enter')} →</span></div></a>`).join('')}</div>
   ${S.how!==false?`<h2 class="sec">${t('howT')}</h2><div class="how"><div>${t('h1')}</div><div>${t('h2')}</div><div>${t('h3')}</div></div>`:''}`;
   return;
  }
- const a=A[view],gs=[...new Set(a.subjects.map(s=>s.grade).filter(Boolean))];
- if(!gs.includes(grade))grade='';
- const L=a.subjects.filter(s=>!grade||s.grade===grade);
- app.innerHTML=`<div style="--c:var(--${view});--ci:var(--${view}i)"><a class="back" href="#home">← ${t('back')}</a>
- <div class="ahd"><img src="${esc(a.logo)}" alt=""><div><h1>${esc(a.name)}</h1><small>${esc(S.title)} · ${esc(S.sub)}</small></div></div>
+ const a=A[view];if(cls&&!a.classes.some(x=>x.id===cls))cls='';
+ const C=a.classes.find(x=>x.id===cls),L=C?a.subjects.filter(s=>s.cls===cls):[];
+ const fo=c=>{const m=a.subjects.filter(s=>s.cls===c.id),o=m.filter(s=>stat(s)==='open').length;return`<a class="fd" href="#${view}/${c.id}"><span class="fi">📁</span><b>${esc(c.name)}</b><small>${m.length} ${t('mapel')}</small>${o?`<span class="pill o">${o} ${t('avail')}</span>`:''}</a>`};
+ app.innerHTML=`<div style="--c:var(--${view});--ci:var(--${view}i)"><a class="back" href="#${C?view:'home'}">← ${t('back')}</a>
+ <div class="ahd"><img src="${esc(a.logo)}" alt=""><div><h1>${esc(C?C.name:a.name)}</h1><small>${esc(C?a.name:S.title+' · '+S.sub)}</small></div></div>
  ${a.info?`<p class="ainfo">${esc(a.info)}</p>`:''}
- ${gs.length?`<div class="chips">${['',...gs].map(g=>`<button class="${g===grade?'on':''}" data-gr="${esc(g)}">${g?esc(g):t('all')}</button>`).join('')}</div>`:''}
- <p class="hint">${t('hint')}</p><div class="grid">${L.map(card).join('')||`<p class="empty-m">${t('none')}</p>`}</div></div>`;
+ ${C?`<p class="hint">${t('hint')}</p><div class="grid">${L.map(card).join('')||`<p class="empty-m">${t('none')}</p>`}</div>`:`<h2 class="sec">${t('pickc')}</h2><div class="fold">${a.classes.map(fo).join('')||`<p class="empty-m">${t('nocls')}</p>`}</div>`}</div>`;
 }
-function route(){const h=location.hash.slice(1);view=h==='smp'||h==='sd'?h:'home';scrollTo(0,0);render()}
+function route(){const[h,c]=location.hash.slice(1).split('/');view=h==='smp'||h==='sd'?h:'home';cls=view==='home'?'':(c||'');scrollTo(0,0);render()}
 setInterval(()=>{
  if(view==='home')return;let ch=0;
  $$('.card').forEach(c=>{const s=cfg.areas[view].subjects.find(x=>x.id===c.dataset.id);if(!s)return;if(stat(s)!==c.dataset.st)ch=1;const d=$('.cd',c);if(d)d.textContent=cd(s)});
@@ -193,17 +195,21 @@ function login(){
 function closeAdmin(){if(dirty&&!confirm('Ada perubahan yang belum disimpan. Tutup panel?'))return;$('#ad').hidden=true;lock()}
 const fld=(l,p,v,x='')=>`<label>${l}<input type="text" data-p="${p}" value="${esc(v)}" ${x}></label>`;
 function tSub(){
- const L=cfg.areas[ak].subjects;
- return`<div class="seg">${['smp','sd'].map(x=>`<button class="${x===ak?'on':''}" data-act="area" data-v="${x}">${x==='smp'?'SMP':'SD'}</button>`).join('')}</div>`+
- L.map((s,i)=>{const P=`areas.${ak}.subjects.${i}.`;return`<div class="sr">
-  <div class="r2">${fld('Nama mapel',P+'name',s.name)}${fld('Kelas (opsional, mis. Kelas 7)',P+'grade',s.grade||'')}</div>
+ const A=cfg.areas[ak],L=A.subjects;
+ if(!A.classes.some(c=>c.id===ac))ac=(A.classes[0]||{}).id;
+ const opt=cid=>A.classes.map(c=>`<option value="${c.id}" ${c.id===cid?'selected':''}>${esc(c.name)}</option>`).join('');
+ return`<div class="seg">${['smp','sd'].map(x=>`<button class="${x===ak?'on':''}" data-act="area" data-v="${x}">${x==='smp'?'SMP':'SD'}</button>`).join('')}</div>
+ <div class="bx"><b>Daftar kelas (folder)</b>${A.classes.map((c,i)=>`<div class="fl"><input type="text" style="flex:1;min-width:130px;width:auto" data-p="areas.${ak}.classes.${i}.name" value="${esc(c.name)}"><button class="btn sm g" data-act="cup" data-i="${i}">↑</button><button class="btn sm g" data-act="cdn" data-i="${i}">↓</button><button class="btn sm r" data-act="cdel" data-i="${i}">🗑</button></div>`).join('')}<button class="btn sm" data-act="cadd" style="justify-self:start">＋ Tambah kelas</button><p class="note">Satu angkatan punya lebih dari satu kelas? Tambahkan kelas baru, misalnya "Kelas VII A" dan "Kelas VII B".</p></div>
+ ${A.classes.length?`<div class="seg w">${A.classes.map(c=>`<button class="${c.id===ac?'on':''}" data-act="csel" data-v="${c.id}">${esc(c.name)}</button>`).join('')}</div>`:''}`+
+ L.map((s,i)=>{if(s.cls!==ac)return'';const P=`areas.${ak}.subjects.${i}.`;return`<div class="sr">
+  <div class="r2">${fld('Nama mapel',P+'name',s.name)}<label>Kelas<select data-p="${P}cls">${opt(s.cls)}</select></label></div>
   <div class="fl"><span class="note">${s.file?'📄 PDF terpasang · '+(s.size/1048576).toFixed(2)+' MB':'Belum ada PDF'}</span>
    <label class="btn sm" style="display:inline-flex;color:var(--pi)">⬆ ${s.file?'Ganti':'Unggah'} PDF<input type="file" accept="application/pdf,.pdf" hidden data-up="${i}"></label>
    ${s.file?`<button class="btn sm g" data-act="view" data-i="${i}">Lihat</button><button class="btn sm r" data-act="rmf" data-i="${i}">Hapus PDF</button>`:''}</div>
   <label class="sw"><input type="checkbox" data-t="chk" data-p="${P}sched" ${s.sched?'checked':''}> Pakai jadwal buka <span class="note">(nonaktif = soal langsung terbuka)</span></label>
   <div class="r2"><label>Dibuka pada<input type="datetime-local" data-t="dt" data-p="${P}open" value="${dtv(s.open)}"></label><label>Ditutup pada (opsional)<input type="datetime-local" data-t="dt" data-p="${P}close" value="${dtv(s.close)}"></label></div>
   <div class="rw"><button class="btn sm g" data-act="up" data-i="${i}">↑</button><button class="btn sm g" data-act="down" data-i="${i}">↓</button><button class="btn sm r" data-act="del" data-i="${i}">🗑 Hapus mapel</button></div></div>`}).join('')+
- `<button class="btn" data-act="add">＋ Tambah mapel</button><p class="note">Maksimal 5 MB per file PDF. Jam mengikuti waktu server GitHub, bukan jam HP siswa.</p>`;
+ `${ac?`<button class="btn" data-act="add">＋ Tambah mapel di kelas ini</button>`:''}${ac&&A.classes.length>1&&L.some(s=>s.cls===ac)?`<button class="btn g" data-act="cpy">Salin daftar mapel kelas ini ke kelas lain</button>`:''}<p class="note">Maksimal 5 MB per file PDF. Jam mengikuti waktu server GitHub, bukan jam HP siswa.</p>`;
 }
 function tThm(){
  const T=cfg.theme,C=[['p','Warna utama'],['a','Warna aksen'],['smp','Area SMP'],['sd','Area SD'],['bg','Latar (terang)'],['card','Kartu (terang)'],['tx','Teks (terang)']];
@@ -244,9 +250,18 @@ async function act(a,b){
  const L=cfg.areas[ak].subjects,i=+b.dataset.i,re=()=>{mark();adminRender();render()};
  switch(a){
   case'area':ak=b.dataset.v;adminRender();break;
-  case'add':L.push(sub('Mapel baru'));re();break;
+  case'add':L.push(sub('Mapel baru',null,ac));re();break;
   case'del':if(confirm(`Hapus mapel "${L[i].name}"?`)){if(L[i].file)trash.push(L[i].file);L.splice(i,1);re()}break;
-  case'up':case'down':{const j=a==='up'?i-1:i+1;if(j>=0&&j<L.length){[L[i],L[j]]=[L[j],L[i]];re()}break}
+  case'up':case'down':{const d=a==='up'?-1:1;let j=i+d;while(j>=0&&j<L.length&&L[j].cls!==L[i].cls)j+=d;if(j>=0&&j<L.length){[L[i],L[j]]=[L[j],L[i]];re()}break}
+  case'csel':ac=b.dataset.v;adminRender();break;
+  case'cadd':{const id=ak+uid();cfg.areas[ak].classes.push({id,name:'Kelas baru'});ac=id;re();break}
+  case'cup':case'cdn':{const C=cfg.areas[ak].classes,j=a==='cup'?i-1:i+1;if(j>=0&&j<C.length){[C[i],C[j]]=[C[j],C[i]];re()}break}
+  case'cdel':{const A=cfg.areas[ak],c=A.classes[i],n=A.subjects.filter(s=>s.cls===c.id).length;
+   if(confirm(`Hapus "${c.name}"${n?` beserta ${n} mapel di dalamnya (termasuk file PDF-nya)`:''}?`)){A.subjects.filter(s=>s.cls===c.id&&s.file).forEach(s=>trash.push(s.file));A.subjects=A.subjects.filter(s=>s.cls!==c.id);A.classes.splice(i,1);re()}break}
+  case'cpy':{const A=cfg.areas[ak],src=A.subjects.filter(s=>s.cls===ac);
+   if(!confirm('Salin daftar mapel kelas ini ke semua kelas lain di area ini? File PDF tidak ikut disalin.'))break;
+   let n=0;A.classes.forEach(c=>{if(c.id!==ac)src.forEach(s=>{if(!A.subjects.some(x=>x.cls===c.id&&x.name===s.name)){A.subjects.push({...sub(s.name,null,c.id),sched:s.sched,open:s.open,close:s.close});n++}})});
+   toast(n?`✅ ${n} mapel disalin ke kelas lain (tanpa PDF).`:'Semua kelas lain sudah punya mapel ini.',4000);re();break}
   case'rmf':if(confirm('Hapus file PDF ini?')){trash.push(L[i].file);L[i].file='';L[i].size=0;re()}break;
   case'view':openPdf(L[i]);break;
   case'save':save();break;
@@ -284,7 +299,7 @@ document.addEventListener('input',e=>{
  let v=el.type==='checkbox'?el.checked:el.value;
  if(el.dataset.t==='dt')v=v?new Date(v).getTime():null;if(el.dataset.t==='num')v=+v;
  const k=p.split('.'),l=k.pop();let o=cfg;k.forEach(x=>o=o[x]);o[l]=v;
- mark();if(p.startsWith('theme'))applyTheme();render();
+ mark();if(p.startsWith('theme'))applyTheme();render();if(p.endsWith('.cls'))adminRender();
  if(p==='theme.r'){const lb=el.closest('label');lb.firstChild.textContent='Kelengkungan sudut: '+v+'px'}
 });
 const rd=f=>new Promise((ok,no)=>{const r=new FileReader();r.onload=()=>ok(r.result.split(',')[1]);r.onerror=no;r.readAsDataURL(f)});

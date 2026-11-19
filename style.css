@@ -118,3 +118,10 @@ html[data-dark="1"] .bnav a.on{color:var(--a)}
 .eye{position:absolute;right:4px;top:50%;transform:translateY(-50%);width:40px;height:36px;border:0;border-radius:10px;background:transparent;color:var(--mut);cursor:pointer;display:grid;place-items:center}
 .eye:hover{background:var(--bd);color:var(--tx)}
 .ainfo{margin-top:12px;padding:12px 14px;border-radius:var(--r);background:color-mix(in srgb,var(--c) 10%,var(--card));border:1px solid var(--bd);white-space:pre-line;font-size:14px}
+.fold{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.fd{display:flex;flex-direction:column;gap:4px;align-items:flex-start;background:var(--card);border:1px solid var(--bd);border-top:5px solid var(--c);border-radius:var(--r);padding:16px;transition:transform .15s,box-shadow .15s}
+.fd:hover{transform:translateY(-3px);box-shadow:0 14px 30px -14px var(--c)}
+.fi{font-size:34px;line-height:1}.fd b{font-size:17px;line-height:1.25}.fd small{color:var(--mut)}
+.seg.w{flex-wrap:wrap}.seg.w button{flex:1 1 90px}
+@media(min-width:760px){.fold{grid-template-columns:repeat(3,1fr)}}
+@media(min-width:1040px){.fold{grid-template-columns:repeat(4,1fr)}}
