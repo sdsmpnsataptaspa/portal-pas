@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Portal Soal PAS Ganjil 2026/2027</title>
+<meta name="description" content="Portal soal Penilaian Akhir Semester Ganjil 2026/2027 SMPN Satu Atap 1 Tasik Payawan dan SDN Talingke">
+<meta name="theme-color" content="#1c3aa9">
+<link rel="icon" href="assets/logo-smp.png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="#home">
+    <span class="logos"><img src="assets/logo-smp.png" alt="Logo SMP"><img src="assets/logo-sd.png" alt="Logo SD"></span>
+    <span class="bt"><b id="bt"></b><small id="bs"></small></span>
+  </a>
+  <nav class="dnav"><a href="#home" data-n="home"></a><a href="#smp" data-n="smp"></a><a href="#sd" data-n="sd"></a></nav>
+  <div class="tools">
+    <select id="lang" aria-label="Bahasa / Language"><option value="id">ID</option><option value="en">EN</option></select>
+    <button id="mode" class="ib" aria-label="Mode">🌓</button>
+    <button id="adm" class="ib" aria-label="Admin">⚙️</button>
+  </div>
+</header>
+<div id="notice" hidden></div>
+<main id="app"></main>
+<footer id="ft"></footer>
+<nav class="bnav">
+  <a href="#home" data-n="home"><i>🏠</i><span></span></a>
+  <a href="#smp" data-n="smp"><i>📘</i><span></span></a>
+  <a href="#sd" data-n="sd"><i>📕</i><span></span></a>
+</nav>
+
+<div id="vw" hidden>
+  <div class="vbar">
+    <b id="vt"></b>
+    <div class="vz"><button data-z="-" aria-label="Zoom out">−</button><span id="vp">100%</span><button data-z="+" aria-label="Zoom in">+</button><button data-z="0" id="vfit"></button></div>
+    <a id="vdl" class="ib" target="_blank" rel="noopener" aria-label="Download">⬇</a>
+    <button id="vx" class="ib x" aria-label="Close">✕</button>
+  </div>
+  <div id="vs"><div id="vpg"></div><div id="vld"></div></div>
+</div>
+<div id="ad" hidden></div>
+<div id="md" hidden></div>
+<div id="toast" role="status"></div>
+<script src="script.js"></script>
+</body>
+</html>
