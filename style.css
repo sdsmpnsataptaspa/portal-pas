@@ -114,3 +114,7 @@ html[data-dark="1"] .bnav a.on{color:var(--a)}
 @media(min-width:1040px){.grid{grid-template-columns:repeat(3,1fr)}.card{flex-wrap:wrap}.card .btn{width:100%}}
 @media(max-width:480px){.r2{grid-template-columns:1fr}.vbar #vfit{display:none}.vz span{min-width:40px}.card .btn{padding:10px 12px}}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
+.pw{position:relative}.pw input{padding-right:48px!important}
+.eye{position:absolute;right:4px;top:50%;transform:translateY(-50%);width:40px;height:36px;border:0;border-radius:10px;background:transparent;color:var(--mut);cursor:pointer;display:grid;place-items:center}
+.eye:hover{background:var(--bd);color:var(--tx)}
+.ainfo{margin-top:12px;padding:12px 14px;border-radius:var(--r);background:color-mix(in srgb,var(--c) 10%,var(--card));border:1px solid var(--bd);white-space:pre-line;font-size:14px}

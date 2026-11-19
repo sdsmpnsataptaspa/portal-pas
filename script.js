@@ -14,20 +14,25 @@ const PRE=[
  {n:'Ungu Modern',t:{p:'#5b3fd1',a:'#ff7a59',bg:'#f6f4fd',card:'#ffffff',tx:'#1d1638',smp:'#5b3fd1',sd:'#c2410c'}},
  {n:'Netral',t:{p:'#1f2937',a:'#22d3ee',bg:'#f3f4f6',card:'#ffffff',tx:'#111827',smp:'#1f2937',sd:'#475569'}}];
 const DEF={
- site:{title:'PENILAIAN AKHIR SEMESTER GANJIL',sub:'TAHUN PELAJARAN 2026/2027',notice:'',footer:'© 2026 SMPN Satu Atap 1 Tasik Payawan & SDN Talingke'},
- theme:{...PRE[0].t,r:16,font:'sys'},
+ site:{title:'PENILAIAN AKHIR SEMESTER GANJIL',sub:'TAHUN PELAJARAN 2026/2027',notice:'',how:true,footer:'© 2026 SMPN Satu Atap 1 Tasik Payawan & SDN Talingke'},
+ theme:{...PRE[0].t,r:16,font:'sys'},text:{id:{},en:{}},
  areas:{
-  smp:{name:'SMPN SATU ATAP 1 TASIK PAYAWAN',logo:'assets/logo-smp.png',subjects:['Pendidikan Agama','PPKn','Bahasa Indonesia','Matematika','IPA','IPS','Bahasa Inggris','PJOK','Informatika','Seni Budaya','Prakarya'].map((n,i)=>sub(n,'smp'+i))},
-  sd:{name:'SDN TALINGKE',logo:'assets/logo-sd.png',subjects:['Pendidikan Agama','PPKn','Bahasa Indonesia','Matematika','IPAS','PJOK','Seni Rupa','Bahasa Inggris'].map((n,i)=>sub(n,'sd'+i))}}};
+  smp:{name:'SMPN SATU ATAP 1 TASIK PAYAWAN',logo:'assets/logo-smp.png',info:'',subjects:['Pendidikan Agama','PPKn','Bahasa Indonesia','Matematika','IPA','IPS','Bahasa Inggris','PJOK','Informatika','Seni Budaya','Prakarya'].map((n,i)=>sub(n,'smp'+i))},
+  sd:{name:'SDN TALINGKE',logo:'assets/logo-sd.png',info:'',subjects:['Pendidikan Agama','PPKn','Bahasa Indonesia','Matematika','IPAS','PJOK','Seni Rupa','Bahasa Inggris'].map((n,i)=>sub(n,'sd'+i))}}};
 const I18={
  id:{tag:'Portal Soal PAS',home:'Beranda',smp:'Area SMP',sd:'Area SD',pick:'Pilih area sekolahmu',enter:'Masuk',mapel:'mata pelajaran',open:'Buka Soal',admOpen:'Buka (admin)',avail:'Tersedia',soon:'Belum dibuka',closed:'Ditutup',empty:'Belum tersedia',opens:'Dibuka',until:'Ditutup',in:'Dibuka dalam',all:'Semua',back:'Kembali',load:'Memuat soal…',err:'Soal gagal dimuat. Periksa sinyal, lalu coba lagi atau',tab:'buka di tab baru',closeq:'Tutup soal yang sedang dibuka?',howT:'Cara menggunakan',h1:'Pilih area sekolahmu.',h2:'Buka soal PDF saat jadwalnya tiba.',h3:'Jawab di lembar jawaban fisik.',fit:'Pas',none:'Belum ada mata pelajaran.',hint:'Cubit layar atau pakai tombol + / − untuk memperbesar soal.'},
  en:{tag:'PAS Exam Portal',home:'Home',smp:'Junior High',sd:'Elementary',pick:'Choose your school area',enter:'Enter',mapel:'subjects',open:'Open Exam',admOpen:'Open (admin)',avail:'Available',soon:'Not open yet',closed:'Closed',empty:'Not available yet',opens:'Opens',until:'Closes',in:'Opens in',all:'All',back:'Back',load:'Loading exam…',err:'The exam failed to load. Check your signal, then try again or',tab:'open in a new tab',closeq:'Close the exam you are viewing?',howT:'How to use',h1:'Choose your school area.',h2:'Open the PDF exam when its schedule starts.',h3:'Write your answers on the paper answer sheet.',fit:'Fit',none:'No subjects yet.',hint:'Pinch the screen or use the + / − buttons to zoom.'}};
 
-let cfg=structuredClone(DEF),lang=localStorage.pas_lang||'id',off=0,view='home',grade='',ak='smp',tab='sub',
+const TK=[['tag','Nama portal (kiri atas)'],['home','Menu: Beranda'],['smp','Menu: Area SMP'],['sd','Menu: Area SD'],['pick','Judul pilihan area'],['enter','Tombol masuk area'],['mapel','Kata "mata pelajaran"'],['howT','Judul "Cara menggunakan"'],['h1','Langkah 1'],['h2','Langkah 2'],['h3','Langkah 3'],['hint','Petunjuk di atas daftar soal'],['open','Tombol buka soal'],['avail','Label: Tersedia'],['soon','Label: Belum dibuka'],['closed','Label: Ditutup'],['empty','Label: Belum tersedia'],['opens','Kata sebelum tanggal buka'],['in','Kata sebelum hitung mundur'],['until','Kata sebelum tanggal tutup'],['all','Filter: Semua'],['back','Tombol kembali'],['fit','Tombol zoom Pas']];
+const EYE='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>',
+ EYEX='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3l18 18M10.6 5.1A10.7 10.7 0 0 1 12 5c6.4 0 10 7 10 7a17 17 0 0 1-3.2 4.2M6.6 6.6A17 17 0 0 0 2 12s3.6 7 10 7a10 10 0 0 0 4.2-.9M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>';
+const pwf=(id,ph,ac)=>`<div class="pw"><input type="password" id="${id}" placeholder="${ph}" autocomplete="${ac}" required><button type="button" class="eye" data-eye="${id}" aria-label="Tampilkan / sembunyikan password">${EYEX}</button></div>`;
+let cfg=structuredClone(DEF),lang=localStorage.pas_lang||'id',off=0,view='home',grade='',ak='smp',tab='sub',tl='id',
  isAdmin=sessionStorage.pas_adm==='1',dirty=false,trash=[];
-const t=k=>I18[lang][k]||k;
+const t=k=>(cfg.text[lang]&&cfg.text[lang][k])||I18[lang][k]||k;
+const pwh=()=>cfg.pw||HASH;
 const now=()=>Date.now()+off;
-function merge(j){const a=j.areas||{};cfg={...DEF,...j,site:{...DEF.site,...j.site},theme:{...DEF.theme,...j.theme},areas:{smp:{...DEF.areas.smp,...a.smp},sd:{...DEF.areas.sd,...a.sd}}}}
+function merge(j){const a=j.areas||{},x=j.text||{};cfg={...DEF,...j,text:{id:{...x.id},en:{...x.en}},site:{...DEF.site,...j.site},theme:{...DEF.theme,...j.theme},areas:{smp:{...DEF.areas.smp,...a.smp},sd:{...DEF.areas.sd,...a.sd}}}}
 
 /* ---------- Tema ---------- */
 const ink=h=>{const n=parseInt(h.slice(1),16);return .299*(n>>16)+.587*(n>>8&255)+.114*(n&255)>150?'#111':'#fff'};
@@ -64,12 +69,13 @@ function render(){
  document.title=`${t('tag')} · ${S.title} ${S.sub}`;
  $('#bt').textContent=t('tag');$('#bs').textContent=S.sub;
  $$('[data-n]').forEach(a=>{a.classList.toggle('on',a.dataset.n===view);const sp=$('span',a),x=t(a.dataset.n);sp?sp.textContent=x:a.textContent=x});
+ const lg=$$('.logos img');lg[0].src=A.smp.logo;lg[1].src=A.sd.logo;$('link[rel=icon]').href=A.smp.logo;
  const nt=$('#notice');nt.hidden=!S.notice;nt.textContent=S.notice;$('#ft').textContent=S.footer;$('#vfit').textContent=t('fit');
  if(view==='home'){
   app.innerHTML=`<section class="hero"><h1>${esc(S.title)}</h1><p>${esc(S.sub)}</p></section>
   <h2 class="sec">${t('pick')}</h2>
   <div class="areas">${['smp','sd'].map(k=>`<a class="ac" href="#${k}" style="--c:var(--${k});--ci:var(--${k}i)"><img src="${esc(A[k].logo)}" alt=""><div><h3 style="font-size:17px">${esc(A[k].name)}</h3><small>${A[k].subjects.length} ${t('mapel')}</small><span class="btn">${t('enter')} →</span></div></a>`).join('')}</div>
-  <h2 class="sec">${t('howT')}</h2><div class="how"><div>${t('h1')}</div><div>${t('h2')}</div><div>${t('h3')}</div></div>`;
+  ${S.how!==false?`<h2 class="sec">${t('howT')}</h2><div class="how"><div>${t('h1')}</div><div>${t('h2')}</div><div>${t('h3')}</div></div>`:''}`;
   return;
  }
  const a=A[view],gs=[...new Set(a.subjects.map(s=>s.grade).filter(Boolean))];
@@ -77,6 +83,7 @@ function render(){
  const L=a.subjects.filter(s=>!grade||s.grade===grade);
  app.innerHTML=`<div style="--c:var(--${view});--ci:var(--${view}i)"><a class="back" href="#home">← ${t('back')}</a>
  <div class="ahd"><img src="${esc(a.logo)}" alt=""><div><h1>${esc(a.name)}</h1><small>${esc(S.title)} · ${esc(S.sub)}</small></div></div>
+ ${a.info?`<p class="ainfo">${esc(a.info)}</p>`:''}
  ${gs.length?`<div class="chips">${['',...gs].map(g=>`<button class="${g===grade?'on':''}" data-gr="${esc(g)}">${g?esc(g):t('all')}</button>`).join('')}</div>`:''}
  <p class="hint">${t('hint')}</p><div class="grid">${L.map(card).join('')||`<p class="empty-m">${t('none')}</p>`}</div></div>`;
 }
@@ -164,14 +171,15 @@ const b64t=s=>{let b='';new TextEncoder().encode(s).forEach(c=>b+=String.fromCha
 let tt;function toast(m,ms=3200){const e=$('#toast');e.textContent=m;e.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>e.classList.remove('on'),ms)}
 function mark(){dirty=true;const b=$('#sv');if(b)b.textContent='💾 Simpan •'}
 async function save(q){
- if(!ghc()){tab='git';adminRender();return toast('Isi token GitHub dulu agar perubahan bisa disimpan.')}
+ if(!ghc()){tab='git';adminRender();toast('Isi token GitHub dulu agar perubahan bisa disimpan.');return false}
  if(!q)toast('Menyimpan…',60000);
  try{
   await put('data/config.json',b64t(JSON.stringify(cfg)),'Perbarui pengaturan portal');
   for(const f of trash.splice(0))await del(f).catch(()=>{});
   dirty=false;localStorage.pas_cache=JSON.stringify(cfg);toast('✅ Tersimpan. Tampil untuk siswa dalam ±1 menit.',4500);
   if(!$('#ad').hidden)adminRender();
- }catch(x){toast('Gagal menyimpan: '+x.message,5000)}
+  return true;
+ }catch(x){toast('Gagal menyimpan: '+x.message,5000);return false}
 }
 
 /* ---------- Panel admin ---------- */
@@ -179,7 +187,7 @@ const sha=async s=>[...new Uint8Array(await crypto.subtle.digest('SHA-256',new T
 const dtv=ts=>ts?new Date(ts-new Date(ts).getTimezoneOffset()*6e4).toISOString().slice(0,16):'';
 function login(){
  const m=$('#md');m.hidden=false;
- m.innerHTML=`<form class="mb" id="lf"><h3>🔐 Masuk Admin</h3><input type="password" id="pw" placeholder="Password admin" autocomplete="current-password" required><div class="er" id="er"></div><div class="rw"><button type="button" class="btn g" data-act="mc">Batal</button><button class="btn" style="flex:1">Masuk</button></div></form>`;
+ m.innerHTML=`<form class="mb" id="lf"><h3>🔐 Masuk Admin</h3>${pwf('pw','Password admin','current-password')}<div class="er" id="er"></div><div class="rw"><button type="button" class="btn g" data-act="mc">Batal</button><button class="btn" style="flex:1">Masuk</button></div></form>`;
  $('#pw').focus();
 }
 function closeAdmin(){if(dirty&&!confirm('Ada perubahan yang belum disimpan. Tutup panel?'))return;$('#ad').hidden=true;lock()}
@@ -208,7 +216,17 @@ function tThm(){
 function tGen(){
  const S=cfg.site,A=cfg.areas;
  return`<div class="bx"><label>Judul utama<textarea data-p="site.title">${esc(S.title)}</textarea></label>${fld('Sub-judul (tahun pelajaran)','site.sub',S.sub)}${fld('Pengumuman (kosongkan jika tidak ada)','site.notice',S.notice)}${fld('Teks footer','site.footer',S.footer)}</div>
- <div class="bx">${fld('Nama area SMP','areas.smp.name',A.smp.name)}${fld('Nama area SD','areas.sd.name',A.sd.name)}<p class="note">Untuk mengganti logo, timpa berkas <code>assets/logo-smp.png</code> dan <code>assets/logo-sd.png</code> di repository.</p></div>`;
+ <div class="bx">${fld('Nama area SMP','areas.smp.name',A.smp.name)}${fld('Nama area SD','areas.sd.name',A.sd.name)}<label>Info tambahan area SMP (tampil di atas daftar soal)<textarea data-p="areas.smp.info">${esc(A.smp.info)}</textarea></label><label>Info tambahan area SD (tampil di atas daftar soal)<textarea data-p="areas.sd.info">${esc(A.sd.info)}</textarea></label></div>
+ <div class="bx"><b>Logo</b>${['smp','sd'].map(k=>`<div class="fl"><img src="${esc(A[k].logo)}" alt="" style="width:44px;height:44px;object-fit:contain"><span class="note">Logo ${k.toUpperCase()}</span><label class="btn sm" style="display:inline-flex;color:var(--pi)">⬆ Ganti logo<input type="file" accept="image/png,image/jpeg,image/webp" hidden data-logo="${k}"></label></div>`).join('')}<p class="note">PNG/JPG/WebP, maksimal 1 MB.</p>
+ <label class="sw"><input type="checkbox" data-t="chk" data-p="site.how" ${S.how!==false?'checked':''}> Tampilkan bagian "Cara menggunakan" di beranda</label></div>`;
+}
+function tTxt(){
+ return`<div class="seg">${['id','en'].map(x=>`<button class="${x===tl?'on':''}" data-act="tl" data-v="${x}">${x==='id'?'Bahasa Indonesia':'English'}</button>`).join('')}</div>
+ <div class="bx"><p class="note">Ubah tulisan yang dilihat siswa untuk bahasa yang dipilih. Kosongkan kolom untuk kembali ke tulisan bawaan (tampil sebagai contoh di kolom).</p>${TK.map(([k,l])=>`<label>${l}<input type="text" data-p="text.${tl}.${k}" value="${esc((cfg.text[tl]||{})[k]||'')}" placeholder="${esc(I18[tl][k])}"></label>`).join('')}</div>`;
+}
+function tSec(){
+ return`<div class="bx"><b>Ganti password admin</b>${pwf('pw0','Password lama','current-password')}${pwf('pw1','Password baru (min. 8 karakter)','new-password')}${pwf('pw2','Ulangi password baru','new-password')}<button class="btn" data-act="cpw">Simpan password baru</button>
+ <p class="note">Password baru tersimpan di repository (sebagai kode acak, bukan teks asli), jadi berlaku di semua perangkat. Pakai kombinasi panjang yang sulit ditebak. Lupa password? Hapus baris <code>"pw"</code> di <code>data/config.json</code> lewat GitHub, maka password kembali ke bawaan.</p></div>`;
 }
 function tGit(){
  const c=ghs();
@@ -217,7 +235,7 @@ function tGit(){
  <div class="rw"><button class="btn" data-act="gts">Uji koneksi</button></div></div>`;
 }
 function adminRender(){
- const el=$('#ad'),y=el.scrollTop,T=[['sub','📚 Mapel & Soal'],['thm','🎨 Tema'],['gen','📝 Umum'],['git','🔗 Penyimpanan']],B={sub:tSub,thm:tThm,gen:tGen,git:tGit};
+ const el=$('#ad'),y=el.scrollTop,T=[['sub','📚 Mapel & Soal'],['thm','🎨 Tema'],['gen','📝 Umum'],['txt','✏️ Teks'],['sec','🔐 Keamanan'],['git','🔗 Penyimpanan']],B={sub:tSub,thm:tThm,gen:tGen,txt:tTxt,sec:tSec,git:tGit};
  el.hidden=false;lock();
  el.innerHTML=`<div class="ahb"><b>⚙️ Panel Admin</b><span class="sp"></span><button class="btn" id="sv" data-act="save">💾 Simpan${dirty?' •':''}</button><button class="ib" data-act="out" title="Keluar admin">⎋</button><button class="ib" data-act="cl" title="Tutup">✕</button></div><div class="tabs">${T.map(([k,l])=>`<button class="${k===tab?'on':''}" data-tab="${k}">${l}</button>`).join('')}</div><div class="ab">${B[tab]()}</div>`;
  el.scrollTop=y;
@@ -235,6 +253,14 @@ async function act(a,b){
   case'cl':closeAdmin();break;
   case'out':if(dirty&&!confirm('Ada perubahan belum disimpan. Keluar?'))break;dirty=false;sessionStorage.removeItem('pas_adm');isAdmin=false;$('#ad').hidden=true;lock();render();break;
   case'mc':$('#md').hidden=true;break;
+  case'tl':tl=b.dataset.v;adminRender();break;
+  case'cpw':{const o=$('#pw0').value,n=$('#pw1').value,c=$('#pw2').value;
+   if(await sha(o)!==pwh())return toast('Password lama salah.');
+   if(n.length<8)return toast('Password baru minimal 8 karakter.');
+   if(n!==c)return toast('Konfirmasi password tidak sama.');
+   if(!ghc())return toast('Isi token GitHub dulu agar password baru tersimpan.');
+   const old=cfg.pw;cfg.pw=await sha(n);
+   if(await save(true))toast('✅ Password admin berhasil diganti.',4500);else cfg.pw=old;break}
   case'rst':if(confirm('Kembalikan semua warna ke bawaan?')){cfg.theme={...DEF.theme};mark();applyTheme();adminRender();render()}break;
   case'gts':{const c=ghs();try{const r=await fetch(`https://api.github.com/repos/${c.owner}/${c.repo}`,{headers:{Authorization:'Bearer '+c.token}}),j=await r.json();toast(!r.ok?'❌ '+(j.message||r.status):j.permissions&&!j.permissions.push?'⚠️ Terhubung, tetapi tanpa izin tulis':'✅ Terhubung ke '+c.owner+'/'+c.repo,4500)}catch{toast('❌ Tidak ada koneksi internet')}break}
  }
@@ -243,7 +269,8 @@ async function act(a,b){
 /* ---------- Event global ---------- */
 document.addEventListener('click',e=>{
  let b;const q=s=>b=e.target.closest(s);
- if(q('[data-open]')){const s=cfg.areas[view]&&cfg.areas[view].subjects.find(x=>x.id===b.dataset.open);s&&openPdf(s)}
+ if(q('[data-eye]')){const i=$('#'+b.dataset.eye),h=i.type==='password';i.type=h?'text':'password';b.innerHTML=h?EYE:EYEX}
+ else if(q('[data-open]')){const s=cfg.areas[view]&&cfg.areas[view].subjects.find(x=>x.id===b.dataset.open);s&&openPdf(s)}
  else if(q('[data-gr]')){grade=b.dataset.gr;render()}
  else if(q('[data-z]')){const z=b.dataset.z;zoom(z==='0'?1:vz*(z==='+'?1.25:.8))}
  else if(q('[data-pre]')){Object.assign(cfg.theme,PRE[+b.dataset.pre].t);mark();applyTheme();adminRender();render()}
@@ -260,9 +287,20 @@ document.addEventListener('input',e=>{
  mark();if(p.startsWith('theme'))applyTheme();render();
  if(p==='theme.r'){const lb=el.closest('label');lb.firstChild.textContent='Kelengkungan sudut: '+v+'px'}
 });
+const rd=f=>new Promise((ok,no)=>{const r=new FileReader();r.onload=()=>ok(r.result.split(',')[1]);r.onerror=no;r.readAsDataURL(f)});
 document.addEventListener('change',async e=>{
  const el=e.target;
  if(el.id==='lang'){lang=el.value;localStorage.pas_lang=lang;render();return}
+ if(el.dataset.logo){
+  const k=el.dataset.logo,f=el.files[0];el.value='';if(!f)return;
+  if(!/^image\/(png|jpeg|webp)$/.test(f.type))return toast('Logo harus berformat PNG, JPG, atau WebP.');
+  if(f.size>1048576)return toast('Logo maksimal 1 MB.');
+  if(!ghc()){tab='git';adminRender();return toast('Isi token GitHub dulu agar logo bisa diunggah.')}
+  toast('Mengunggah logo…',90000);
+  try{const ext=f.type==='image/png'?'png':f.type==='image/webp'?'webp':'jpg',path=`assets/logo-${k}-${uid()}.${ext}`;await put(path,await rd(f),'Ganti logo '+k.toUpperCase());
+   const o=cfg.areas[k].logo;if(/^assets\/logo-\w+-\w+\./.test(o))trash.push(o);cfg.areas[k].logo=path;mark();await save(true);adminRender();render()}catch(x){toast('Gagal mengunggah logo: '+x.message,5000)}
+  return;
+ }
  if(el.dataset.up===undefined)return;
  const f=el.files[0];el.value='';if(!f)return;
  if(f.type!=='application/pdf'&&!/\.pdf$/i.test(f.name))return toast('File harus berformat PDF.');
@@ -278,14 +316,15 @@ document.addEventListener('change',async e=>{
 document.addEventListener('submit',async e=>{
  if(e.target.id!=='lf')return;e.preventDefault();
  let h='';try{h=await sha($('#pw').value)}catch{return $('#er').textContent='Buka situs lewat https agar login berfungsi.'}
- if(h===HASH){isAdmin=true;sessionStorage.pas_adm='1';$('#md').hidden=true;render();adminRender()}else $('#er').textContent='Password salah.';
+ await ready;h=await sha($('#pw').value);
+ if(h===pwh()){isAdmin=true;sessionStorage.pas_adm='1';$('#md').hidden=true;render();adminRender()}else $('#er').textContent='Password salah.';
 });
 $('#adm').onclick=()=>isAdmin?adminRender():login();
 $('#mode').onclick=()=>{localStorage.pas_mode=dk()?'light':'dark';applyTheme()};
 $('#lang').value=lang;
 
 /* ---------- Mulai ---------- */
-(async function init(){
+const ready=(async function init(){
  try{const c=localStorage.pas_cache;c&&merge(JSON.parse(c))}catch{}
  applyTheme();route();
  try{
