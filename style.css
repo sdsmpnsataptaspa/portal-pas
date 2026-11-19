@@ -192,3 +192,26 @@ main{padding-left:max(16px,env(safe-area-inset-left));padding-right:max(16px,env
 .fb.er{color:var(--er);background:color-mix(in srgb,var(--er) 11%,transparent)}
 .mb h3{font-size:18px}.mb .btn{min-height:44px}
 .mb .note{line-height:1.5}
+
+/* mapel bisa dilipat */
+.sh{padding:0 12px 0 0}
+.tg{flex:1;display:flex;align-items:center;gap:8px;min-width:0;min-height:48px;padding:0 0 0 12px;background:none;border:0;color:inherit;text-align:left;cursor:pointer}
+.chv{flex:none;font-size:20px;line-height:1;transition:transform .2s}
+.sr.shut .chv{transform:rotate(180deg)}
+.sr.shut .sb{display:none}
+.sum{display:none;padding:8px 14px;font-size:13px;color:var(--mut)}
+.sr.shut .sum{display:block}
+.sr.bad .sum{color:var(--er);font-weight:600}
+.sr{scroll-margin-top:64px}
+.tgb label.sw{flex-basis:100%}
+
+/* geser urutan */
+.dg{flex:none;width:42px;min-height:48px;display:grid;place-items:center;background:none;border:0;color:inherit;font-size:22px;line-height:1;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+.dg:active{cursor:grabbing}
+.tg{padding-left:2px}
+.ab.sorting{user-select:none;-webkit-user-select:none}
+.ab.sorting .sb{display:none}
+.ab.sorting .sum{display:block}
+.ph{border:2px dashed var(--p);border-radius:var(--r);background:color-mix(in srgb,var(--p) 8%,transparent)}
+.sr.lift{box-shadow:0 16px 32px -8px #000b;opacity:.97}
+@media(max-width:560px){.mv{display:none}}

@@ -188,7 +188,7 @@ const b64t=s=>{let b='';new TextEncoder().encode(s).forEach(c=>b+=String.fromCha
 let tt;function toast(m,ms=3200){const e=$('#toast');e.textContent=m;e.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>e.classList.remove('on'),ms)}
 function mark(){dirty=true;const d=$('#dst');if(d){d.textContent='● Belum disimpan';d.className='dy'}}
 async function save(q){
- const bad=probs().filter(x=>x.e);if(bad.length){await ask('Ada isian yang salah',bad.slice(0,8).map(x=>'• '+x.m).join('\n'),'Mengerti',false,true);return false}
+ const bad=probs().filter(x=>x.e);if(bad.length){await ask('Ada isian yang salah',bad.slice(0,8).map(x=>'• '+x.m).join('\n'),'Mengerti',false,true);const f=bad.find(x=>x.id);if(f){bad.forEach(x=>x.id&&shut.delete(x.id));ak=f.k;ac=f.c;tab='sub';adminRender();const e=$(`[data-sid="${f.id}"]`);e&&e.scrollIntoView({block:'center'})}return false}
  if(!ghc()){tab='git';adminRender();toast('Isi token GitHub dulu agar perubahan bisa disimpan.');return false}
  if(!q)toast('Menyimpan…',60000);
  try{
@@ -203,6 +203,7 @@ async function save(q){
 /* ---------- Panel admin ---------- */
 const sha=async s=>[...new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s)))].map(x=>x.toString(16).padStart(2,'0')).join('');
 const dtv=ts=>t2w(ts,TZ());
+const shut=new Set();let one=localStorage.pas_one==='1';
 const STL={empty:'Belum ada PDF',open:'Terbuka',soon:'Terjadwal',closed:'Ditutup'};
 function ask(ti,msg,ok,danger,only){return new Promise(r=>{const m=$('#md');m.hidden=false;
  m.innerHTML=`<div class="mb" role="dialog" aria-modal="true"><h3>${esc(ti)}</h3><p class="note" style="white-space:pre-line">${esc(msg)}</p><div class="rw">${only?'':'<button type="button" class="btn g" data-k="0">Batal</button>'}<button type="button" class="btn${danger?' r':''}" style="flex:1" data-k="1">${esc(ok)}</button></div></div>`;
@@ -216,12 +217,47 @@ function sch(s){
  if(s.close){if(s.open&&s.close<=s.open){e=1;m.push(['er','Jam tutup harus SETELAH jam buka.'])}else m.push([s.close<=n?'wa':'ok','Ditutup: '+fz(s.close,'id')+(s.close<=n?' (sudah lewat, soal tertutup)':'')])}
  else m.push(['ok','Tanpa jam tutup: soal tetap terbuka setelah dibuka.']);
  return{e,h:m.map(([c,x])=>`<div class="fb ${c}">${esc(x)}</div>`).join('')}}
-function pv(c,s){const st=stat(s),b=$('.stc',c),v=sch(s);b.className='stc '+st;b.textContent=STL[st];$('.shn',c).textContent=s.name||'(tanpa nama)';$('.pv',c).innerHTML=v.h;c.classList.toggle('bad',!!v.e)}
+const sum=(s,v)=>(v.e?'⚠ Jam tutup sebelum jam buka · ':'')+(s.file?'PDF terpasang':'Belum ada PDF')+' · '+(s.sched?(s.open?'Buka '+fz(s.open,'id'):'Jam buka kosong'):'Tanpa jadwal');
+/* ---------- Geser untuk mengubah urutan mapel ---------- */
+let dr=null;
+function reorder(ids){const L=cfg.areas[ak].subjects,pos=[],cur=[];
+ L.forEach((s,i)=>{if(s.cls===ac){pos.push(i);cur.push(s)}});
+ const m=new Map(cur.map(s=>[s.id,s]));
+ if(ids.length!==cur.length||ids.some(id=>!m.has(id)))return 0;
+ if(ids.every((id,k)=>id===cur[k].id))return 1;
+ ids.forEach((id,k)=>{L[pos[k]]=m.get(id)});return 2}
+function place(){const{card,ph,box,oy,y}=dr;card.style.top=(y-oy)+'px';
+ const sib=$$('.sr',box).filter(x=>x!==card);let ref=null;
+ for(const s of sib){const b=s.getBoundingClientRect();if(y<b.top+b.height/2){ref=s;break}}
+ if(ref)ref.before(ph);else if(sib.length)sib[sib.length-1].after(ph)}
+function tick(){if(!dr)return;const H=innerHeight,y=dr.y;let d=0;
+ if(y<130)d=-Math.min(24,Math.ceil((130-y)/6));else if(y>H-150)d=Math.min(24,Math.ceil((y-(H-150))/6));
+ if(d){$('#ad').scrollTop+=d;place()}
+ dr.raf=requestAnimationFrame(tick)}
+function endDrag(){if(!dr)return;const{card,box,ph}=dr;cancelAnimationFrame(dr.raf);
+ const ids=[];[...box.children].forEach(x=>{if(x===ph)ids.push(card.dataset.sid);else if(x!==card&&x.classList.contains('sr'))ids.push(x.dataset.sid)});
+ ph.remove();['position','left','top','width','zIndex'].forEach(p=>{card.style[p]=''});card.classList.remove('lift');box.classList.remove('sorting');dr=null;
+ if(reorder(ids)===2){mark();adminRender()}}
+document.addEventListener('pointerdown',e=>{
+ const h=e.target.closest&&e.target.closest('.dg');if(!h||(e.pointerType==='mouse'&&e.button!==0)||dr)return;
+ e.preventDefault();const card=h.closest('.sr'),box=card.parentNode;box.classList.add('sorting');
+ const r=card.getBoundingClientRect(),ph=document.createElement('div');ph.className='ph';ph.style.height=r.height+'px';card.before(ph);
+ Object.assign(card.style,{position:'fixed',left:r.left+'px',top:r.top+'px',width:r.width+'px',zIndex:6});card.classList.add('lift');
+ dr={card,box,ph,y:e.clientY,oy:Math.min(Math.max(e.clientY-r.top,0),r.height)};
+ try{h.setPointerCapture(e.pointerId)}catch{}
+ dr.raf=requestAnimationFrame(tick)});
+document.addEventListener('pointermove',e=>{if(dr){dr.y=e.clientY;place()}});
+document.addEventListener('pointerup',endDrag);document.addEventListener('pointercancel',endDrag);
+function tog(b){const c=b.closest('.sr'),id=b.dataset.tog,op=shut.has(id);
+ if(op){shut.delete(id);if(one)$$('.sr',c.parentNode).forEach(x=>{if(x!==c){shut.add(x.dataset.sid);x.classList.add('shut');$('.tg',x).setAttribute('aria-expanded','false')}})}else shut.add(id);
+ c.classList.toggle('shut',shut.has(id));b.setAttribute('aria-expanded',String(!shut.has(id)));
+ if(op&&one)c.scrollIntoView({block:'start'})}
+function pv(c,s){const st=stat(s),b=$('.stc',c),v=sch(s);b.className='stc '+st;b.textContent=STL[st];$('.shn',c).textContent=s.name||'(tanpa nama)';$('.pv',c).innerHTML=v.h;$('.sum',c).textContent=sum(s,v);c.classList.toggle('bad',!!v.e)}
 function probs(){const r=[];for(const k of['smp','sd']){const A=cfg.areas[k],K=k.toUpperCase();
  A.classes.forEach(c=>{if(!String(c.name).trim())r.push({e:1,m:`${K}: ada kelas tanpa nama.`})});
  A.subjects.forEach(s=>{const c=(A.classes.find(x=>x.id===s.cls)||{}).name||'?';
-  if(!String(s.name).trim())r.push({e:1,m:`${K} · ${c}: ada mapel tanpa nama.`});
-  else if(s.sched&&s.open&&s.close&&s.close<=s.open)r.push({e:1,m:`${K} · ${c} · ${s.name}: jam tutup harus setelah jam buka.`})})}
+  if(!String(s.name).trim())r.push({e:1,m:`${K} · ${c}: ada mapel tanpa nama.`,id:s.id,k,c:s.cls});
+  else if(s.sched&&s.open&&s.close&&s.close<=s.open)r.push({e:1,m:`${K} · ${c} · ${s.name}: jam tutup harus setelah jam buka.`,id:s.id,k,c:s.cls})})}
  return r}
 function login(){
  const m=$('#md');m.hidden=false;
@@ -241,14 +277,15 @@ function tSub(){
  const cl=`<div class="bx"><b>📁 Daftar kelas (folder)</b>${A.classes.map((c,i)=>`<div class="fl"><input type="text" required style="flex:1;min-width:130px;width:auto" data-p="areas.${ak}.classes.${i}.name" value="${esc(c.name)}"><button class="btn sm g" data-act="cup" data-i="${i}" aria-label="Naikkan">↑</button><button class="btn sm g" data-act="cdn" data-i="${i}" aria-label="Turunkan">↓</button><button class="btn sm r" data-act="cdel" data-i="${i}" aria-label="Hapus kelas">🗑</button></div>`).join('')}<button class="btn sm" data-act="cadd" style="justify-self:start">＋ Tambah kelas</button><p class="note">Satu angkatan punya lebih dari satu kelas? Tambahkan kelas baru, misalnya "Kelas VII A" dan "Kelas VII B".</p></div>
  ${A.classes.length?`<div class="seg w">${A.classes.map(c=>`<button class="${c.id===ac?'on':''}" data-act="csel" data-v="${c.id}">${esc(c.name)}</button>`).join('')}</div>`:''}`;
  const ctx=`<div class="ctx" style="--c:var(--${ak});--ci:var(--${ak}i)"><b>Mengedit: ${ak.toUpperCase()}</b><span>›</span><b>${esc(C?C.name:'belum ada kelas')}</b><em>${L.filter(s=>s.cls===ac).length} mapel</em></div>`;
- const cards=L.map((s,i)=>{if(s.cls!==ac)return'';const P=`areas.${ak}.subjects.${i}.`,st=stat(s),v=sch(s);return`<section class="sr${v.e?' bad':''}" data-sid="${s.id}" style="--c:var(--${ak});--ci:var(--${ak}i)">
- <div class="sh"><span class="no">${++n}</span><b class="shn">${esc(s.name||'(tanpa nama)')}</b><span class="stc ${st}">${STL[st]}</span><span class="mv"><button class="btn sm g" data-act="up" data-i="${i}" aria-label="Naikkan urutan">↑</button><button class="btn sm g" data-act="down" data-i="${i}" aria-label="Turunkan urutan">↓</button></span></div>
+ const bar=L.some(s=>s.cls===ac)?`<div class="rw tgb"><button class="btn sm g" data-act="shutall">▴ Tutup semua</button><button class="btn sm g" data-act="openall">▾ Buka semua</button><label class="sw"><input type="checkbox" id="one" ${one?'checked':''}> Buka satu saja, yang lain otomatis menutup</label><p class="note" style="flex-basis:100%">Tahan ⋮⋮ di kiri mapel lalu geser untuk mengubah urutan. Urutan yang sama tampil untuk siswa setelah kamu menekan Simpan.</p></div>`:'';
+ const cards=L.map((s,i)=>{if(s.cls!==ac)return'';const P=`areas.${ak}.subjects.${i}.`,st=stat(s),v=sch(s);return`<section class="sr${v.e?' bad':''}${shut.has(s.id)?' shut':''}" data-sid="${s.id}" style="--c:var(--${ak});--ci:var(--${ak}i)">
+ <div class="sh"><button type="button" class="dg" aria-label="Tahan dan geser untuk mengubah urutan" title="Tahan dan geser untuk mengubah urutan">⋮⋮</button><button type="button" class="tg" data-tog="${s.id}" aria-expanded="${!shut.has(s.id)}" aria-label="Buka atau tutup mapel"><span class="no">${++n}</span><b class="shn">${esc(s.name||'(tanpa nama)')}</b><span class="stc ${st}">${STL[st]}</span><span class="chv" aria-hidden="true">▴</span></button><span class="mv"><button class="btn sm g" data-act="up" data-i="${i}" aria-label="Naikkan urutan">↑</button><button class="btn sm g" data-act="down" data-i="${i}" aria-label="Turunkan urutan">↓</button></span></div><div class="sum">${esc(sum(s,v))}</div>
  <div class="sb s1"><div class="sl">Nama dan kelas</div><div class="r2"><label>Nama mapel<input type="text" required data-p="${P}name" value="${esc(s.name)}"></label><label>Kelas<select data-p="${P}cls">${opt(s.cls)}</select></label></div></div>
  <div class="sb s2"><div class="sl">File soal (PDF)</div><div class="fl"><span class="fb ${s.file?'ok':'wa'}">${s.file?'📄 PDF terpasang · '+(s.size/1048576).toFixed(2)+' MB':'Belum ada PDF'}</span><label class="btn sm">⬆ ${s.file?'Ganti':'Unggah'} PDF<input type="file" accept="application/pdf,.pdf" hidden data-up="${i}"></label>${s.file?`<button class="btn sm g" data-act="view" data-i="${i}">👁 Lihat</button>`:''}</div></div>
  <div class="sb s3"><div class="sl">Jadwal buka · zona ${zl(s.open||s.close||now())}</div><label class="sw"><input type="checkbox" data-t="chk" data-p="${P}sched" ${s.sched?'checked':''}> Pakai jadwal buka <span class="note">(nonaktif = soal langsung terbuka)</span></label>
   <div class="r2"><label>Dibuka pada<input type="datetime-local" min="2020-01-01T00:00" max="2099-12-31T23:59" data-t="dt" data-p="${P}open" value="${dtv(s.open)}" ${s.sched?'':'disabled'}></label><label>Ditutup pada (opsional)<input type="datetime-local" min="2020-01-01T00:00" max="2099-12-31T23:59" data-t="dt" data-p="${P}close" value="${dtv(s.close)}" ${s.sched?'':'disabled'}></label></div><div class="pv">${v.h}</div></div>
  <div class="sb s4"><div class="sl">Hapus</div><div class="rw">${s.file?`<button class="btn sm r" data-act="rmf" data-i="${i}">Hapus PDF</button>`:''}<button class="btn sm r" data-act="del" data-i="${i}">🗑 Hapus mapel</button></div></div></section>`}).join('');
- return tzb+seg+cl+ctx+cards+`${ac?`<button class="btn" data-act="add">＋ Tambah mapel di kelas ini</button>`:''}${ac&&A.classes.length>1&&L.some(s=>s.cls===ac)?`<button class="btn g" data-act="cpy">Salin daftar mapel kelas ini ke kelas lain</button>`:''}<p class="note">Maksimal 5 MB per file PDF. Waktu buka dihitung dari jam server, tidak dari jam HP siswa.</p>`;
+ return tzb+seg+cl+ctx+bar+cards+`${ac?`<button class="btn" data-act="add">＋ Tambah mapel di kelas ini</button>`:''}${ac&&A.classes.length>1&&L.some(s=>s.cls===ac)?`<button class="btn g" data-act="cpy">Salin daftar mapel kelas ini ke kelas lain</button>`:''}<p class="note">Maksimal 5 MB per file PDF. Waktu buka dihitung dari jam server, tidak dari jam HP siswa.</p>`;
 }
 function tThm(){
  const T=cfg.theme,C=[['p','Warna utama'],['a','Warna aksen'],['smp','Area SMP'],['sd','Area SD'],['bg','Latar (terang)'],['card','Kartu (terang)'],['tx','Teks (terang)']];
@@ -289,10 +326,12 @@ async function act(a,b){
  const L=cfg.areas[ak].subjects,i=+b.dataset.i,re=()=>{mark();adminRender();render()};
  switch(a){
   case'area':ak=b.dataset.v;adminRender();break;
-  case'add':{const n=sub('Mapel baru',null,ac);L.push(n);re();const e=$(`[data-sid="${n.id}"]`);e&&e.scrollIntoView({block:'center'});break}
+  case'add':{const n=sub('Mapel baru',null,ac);L.push(n);if(one)L.forEach(x=>{if(x.cls===ac&&x.id!==n.id)shut.add(x.id)});re();const e=$(`[data-sid="${n.id}"]`);e&&e.scrollIntoView({block:'center'});break}
   case'del':if(await ask('Hapus mapel?',`"${L[i].name}" akan dihapus${L[i].file?' beserta file PDF-nya':''}.`,'Ya, hapus',true)){if(L[i].file)trash.push(L[i].file);L.splice(i,1);re()}break;
   case'up':case'down':{const d=a==='up'?-1:1;let j=i+d;while(j>=0&&j<L.length&&L[j].cls!==L[i].cls)j+=d;if(j>=0&&j<L.length){[L[i],L[j]]=[L[j],L[i]];re()}break}
   case'csel':ac=b.dataset.v;adminRender();break;
+  case'shutall':L.forEach(s=>{if(s.cls===ac)shut.add(s.id)});adminRender();break;
+  case'openall':L.forEach(s=>{if(s.cls===ac)shut.delete(s.id)});adminRender();break;
   case'cadd':{const id=ak+uid();cfg.areas[ak].classes.push({id,name:'Kelas baru'});ac=id;re();break}
   case'cup':case'cdn':{const C=cfg.areas[ak].classes,j=a==='cup'?i-1:i+1;if(j>=0&&j<C.length){[C[i],C[j]]=[C[j],C[i]];re()}break}
   case'cdel':{const A=cfg.areas[ak],c=A.classes[i],n=A.subjects.filter(s=>s.cls===c.id).length;
@@ -324,6 +363,7 @@ async function act(a,b){
 document.addEventListener('click',e=>{
  let b;const q=s=>b=e.target.closest(s);
  if(q('[data-eye]')){const i=$('#'+b.dataset.eye),h=i.type==='password';i.type=h?'text':'password';b.innerHTML=h?EYE:EYEX}
+ else if(q('[data-tog]'))tog(b);
  else if(q('[data-open]')){const s=cfg.areas[view]&&cfg.areas[view].subjects.find(x=>x.id===b.dataset.open);s&&openPdf(s)}
  else if(q('[data-gr]')){grade=b.dataset.gr;render()}
  else if(q('[data-z]')){const z=b.dataset.z;zoom(z==='0'?1:vz*(z==='+'?1.25:.8))}
@@ -345,6 +385,7 @@ const rd=f=>new Promise((ok,no)=>{const r=new FileReader();r.onload=()=>ok(r.res
 document.addEventListener('change',async e=>{
  const el=e.target;
  if(el.id==='lang'){lang=el.value;localStorage.pas_lang=lang;render();return}
+ if(el.id==='one'){one=el.checked;localStorage.pas_one=one?'1':'0';return}
  if(el.id==='tzs'){const old=TZ(),nz=el.value;if(nz===old)return;
   const all=Object.values(cfg.areas).flatMap(a=>a.subjects).filter(s=>s.open||s.close);
   if(all.length&&!await ask('Ganti zona waktu?',`Jam yang sudah diisi tetap angka yang sama (misalnya 07:30), tetapi sekarang dibaca sebagai ${zname(nz)}. Waktu buka sebenarnya bergeser untuk ${all.length} mapel.`,'Ya, ganti zona')){el.value=old;return}
